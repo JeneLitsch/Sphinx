@@ -46,6 +46,29 @@ namespace sphinx {
 
 
 
+	function on_between_case(instance, fx, test_case) private {
+		var result = std::invoke(fx, test_case.input);
+		std::io::reset_color();
+		if(std::is_between(result, test_case.expected[0], test_case.expected[1])) {
+			print_success(instance.output, "ok: "
+				+ std::string(test_case.input) 
+				+ " -> " 
+				+ std::string(test_case.expected)
+			);
+		}
+		else {
+			print_fail(instance.output, "[ERROR]: "
+				+ std::string(test_case.input) 
+				+ " ->" 
+				+ " expected a value between" + std::string(test_case.expected)
+				+ " got " + std::string(result)
+			);
+			instance.error_count += 1;
+		}
+	}
+
+
+
 	function on_success_case(instance, fx, test_case) private {
 		if(was_successful(fx, test_case.input)) {
 			print_success(instance.output, "ok: "
@@ -97,6 +120,7 @@ namespace sphinx {
 		RESULT;
 		SUCCESS;
 		FAIL;
+		BETWEEN;
 	}
 
 
@@ -104,6 +128,16 @@ namespace sphinx {
 	function assert_result(input, expected) {
 		var test_case = std::struct();
 		test_case.type = case_type::RESULT;
+		test_case.input = input;
+		test_case.expected = expected;
+		return test_case;
+	}
+
+
+
+	function assert_between(input, expected) {
+		var test_case = std::struct();
+		test_case.type = case_type::BETWEEN;
 		test_case.input = input;
 		test_case.expected = expected;
 		return test_case;
@@ -139,6 +173,9 @@ namespace sphinx {
 			switch(test_case.type) {
 				case case_type::RESULT:
 					on_result_case(instance, fx, test_case);
+
+				case case_type::BETWEEN:
+					on_between_case(instance, fx, test_case);
 				
 				case case_type::SUCCESS:
 					on_success_case(instance, fx, test_case);
