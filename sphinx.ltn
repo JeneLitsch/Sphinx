@@ -27,7 +27,7 @@ namespace sphinx {
 		var result = std::invoke(fx, test_case.input);
 		std::io::reset_color();
 		if(result == test_case.expected) {
-			print_success(instance.output, "ok: "
+			print_success(instance.output, "[ok] "
 				+ std::string(test_case.input) 
 				+ " -> " 
 				+ std::string(test_case.expected)
@@ -50,7 +50,7 @@ namespace sphinx {
 		var result = std::invoke(fx, test_case.input);
 		std::io::reset_color();
 		if(std::is_between(result, test_case.expected[0], test_case.expected[1])) {
-			print_success(instance.output, "ok: "
+			print_success(instance.output, "[ok] "
 				+ std::string(test_case.input) 
 				+ " -> " 
 				+ std::string(test_case.expected)
@@ -71,7 +71,7 @@ namespace sphinx {
 
 	function on_success_case(instance, fx, test_case) private {
 		if(was_successful(fx, test_case.input)) {
-			print_success(instance.output, "ok: "
+			print_success(instance.output, "[ok] "
 				+ std::string(test_case.input) 
 				+ " was successful"
 			);
@@ -89,7 +89,7 @@ namespace sphinx {
 
 	function on_fail_case(instance, fx, test_case) private {
 		if(!was_successful(fx, test_case.input)) {
-			print_success(instance.output, "ok: "
+			print_success(instance.output, "[ok] "
 				+ std::string(test_case.input) 
 				+ " exception was thrown correctly"
 			);
@@ -160,6 +160,11 @@ namespace sphinx {
 		test_case.input = input;
 		return test_case;
 	}
+
+
+
+	function assert_true(input) => assert_result(input, true)
+	function assert_false(input) => assert_result(input, false)
 
 
 
