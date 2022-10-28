@@ -40,7 +40,7 @@ namespace sphinx {
 				+ " expected " + std::str(test_case.expected)
 				+ " got " + std::str(result)
 			);
-			instance.error_count += 1;
+			instance.error_count = instance.error_count + 1;
 		}
 	}
 
@@ -63,7 +63,7 @@ namespace sphinx {
 				+ " expected a value between" + std::str(test_case.expected)
 				+ " got " + std::str(result)
 			);
-			instance.error_count += 1;
+			instance.error_count = instance.error_count + 1;
 		}
 	}
 
@@ -81,7 +81,7 @@ namespace sphinx {
 				+ std::str(test_case.input) 
 				+ " failed"
 			);
-			instance.error_count += 1;
+			instance.error_count = instance.error_count + 1;
 		}
 	}
 
@@ -99,7 +99,7 @@ namespace sphinx {
 				+ std::str(test_case.input) 
 				+ " expected exception"
 			);
-			instance.error_count += 1;
+			instance.error_count = instance.error_count + 1;
 		}
 	}
 
@@ -170,9 +170,9 @@ namespace sphinx {
 
 	function run_test(instance, name, fx, cases) {
 		std::println(instance.output, "Testing: " + std::str(name));
-		instance.test_count += 1;
+		instance.test_count = instance.test_count + 1;
 		for (i : 0 -> std::size(cases)) {
-			instance.case_count += 1;
+			instance.case_count = instance.case_count + 1;
 			std::io::reset_color();
 			var test_case = cases[i];
 			switch(test_case.type) {
