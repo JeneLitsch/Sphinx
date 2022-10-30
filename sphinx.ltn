@@ -117,4 +117,21 @@ namespace sphinx {
 			emit_error("[FAILED] Expected false but got true");
 		}
 	}
+
+
+
+	function assert_success(fx) private {
+		inc_case();
+		if(!std::is_successful(fx)) {
+			emit_error("[FAILED] Expected success but got exception");
+		}
+	}
+
+
+	function assert_except(fx) private {
+		inc_case();
+		if(std::is_successful(fx)) {
+			emit_error("[FAILED] Expected exception but got success");
+		}
+	}
 }
