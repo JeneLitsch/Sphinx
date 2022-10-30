@@ -26,7 +26,6 @@ namespace sphinx {
 				}
 			}
 			std::io::reset_color();
-			std::println("");
 
 			global total_errors = global total_errors + global last_errors;
 			global last_errors = [];
