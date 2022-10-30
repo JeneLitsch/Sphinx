@@ -1,221 +1,123 @@
 namespace sphinx {
-	function print_success(output, msg) private {
-		std::io::set_fg_color(std::io::color::GREEN);
-		std::println(output, msg);
-	}
+	namespace internal {
+		global total_errors = [];
+		global last_errors = [];
+		global test_count = 0;
+		global case_count = 0;
 
 
-
-	function print_fail(output, msg) private {
-		std::io::set_fg_color(std::io::color::BOLD_RED);
-		std::println(output, msg);
-	}
-
-
-
-	function was_successful(fx, params) private {
-		std::invoke(fx, params);
-		return true; 
-	}
-	except(e) {
-		return false;
-	}
-
-
-
-	function on_result_case(instance, fx, test_case) private {
-		var result = std::invoke(fx, test_case.input);
-		std::io::reset_color();
-		if(result == test_case.expected) {
-			print_success(instance.output, "[ok] "
-				+ std::str(test_case.input) 
-				+ " -> " 
-				+ std::str(test_case.expected)
-			);
+		function emit_error(error) {
+			std::insert_back(global last_errors, error);
 		}
-		else {
-			print_fail(instance.output, "[ERROR]: "
-				+ std::str(test_case.input) 
-				+ " ->" 
-				+ " expected " + std::str(test_case.expected)
-				+ " got " + std::str(result)
-			);
-			instance.error_count = instance.error_count + 1;
-		}
-	}
 
 
 
-	function on_between_case(instance, fx, test_case) private {
-		var result = std::invoke(fx, test_case.input);
-		std::io::reset_color();
-		if(std::is_between(result, test_case.expected[0], test_case.expected[1])) {
-			print_success(instance.output, "[ok] "
-				+ std::str(test_case.input) 
-				+ " -> " 
-				+ std::str(test_case.expected)
-			);
-		}
-		else {
-			print_fail(instance.output, "[ERROR]: "
-				+ std::str(test_case.input) 
-				+ " ->" 
-				+ " expected a value between" + std::str(test_case.expected)
-				+ " got " + std::str(result)
-			);
-			instance.error_count = instance.error_count + 1;
-		}
-	}
-
-
-
-	function on_success_case(instance, fx, test_case) private {
-		if(was_successful(fx, test_case.input)) {
-			print_success(instance.output, "[ok] "
-				+ std::str(test_case.input) 
-				+ " was successful"
-			);
-		}
-		else {
-			print_fail(instance.output, "[ERROR]: "
-				+ std::str(test_case.input) 
-				+ " failed"
-			);
-			instance.error_count = instance.error_count + 1;
-		}
-	}
-
-
-
-	function on_fail_case(instance, fx, test_case) private {
-		if(!was_successful(fx, test_case.input)) {
-			print_success(instance.output, "[ok] "
-				+ std::str(test_case.input) 
-				+ " exception was thrown correctly"
-			);
-		}
-		else {
-			print_fail(instance.output,"[ERROR]: "
-				+ std::str(test_case.input) 
-				+ " expected exception"
-			);
-			instance.error_count = instance.error_count + 1;
-		}
-	}
-
-
-
-	function init(output) {
-		var instance = std::struct();
-		instance.error_count = 0;
-		instance.test_count = 0;
-		instance.case_count = 0;
-		instance.output = output;
-		return instance;
-	}
-
-
-
-	enum case_type {
-		RESULT;
-		SUCCESS;
-		FAIL;
-		BETWEEN;
-	}
-
-
-
-	function assert_result(input, expected) {
-		var test_case = std::struct();
-		test_case.type = case_type::RESULT;
-		test_case.input = input;
-		test_case.expected = expected;
-		return test_case;
-	}
-
-
-
-	function assert_between(input, expected) {
-		var test_case = std::struct();
-		test_case.type = case_type::BETWEEN;
-		test_case.input = input;
-		test_case.expected = expected;
-		return test_case;
-	}
-
-
-
-	function assert_success(input) {
-		var test_case = std::struct();
-		test_case.type = case_type::SUCCESS;
-		test_case.input = input;
-		return test_case;
-	}
-
-
-
-	function assert_fail(input) {
-		var test_case = std::struct();
-		test_case.type = case_type::FAIL;
-		test_case.input = input;
-		return test_case;
-	}
-
-
-
-	function assert_true(input) => assert_result(input, true)
-	function assert_false(input) => assert_result(input, false)
-
-
-
-	function run_test(instance, name, fx, cases) {
-		std::println(instance.output, "Testing: " + std::str(name));
-		instance.test_count = instance.test_count + 1;
-		for (i : 0 -> std::size(cases)) {
-			instance.case_count = instance.case_count + 1;
+		function push_errors() {
+			internal::inc_test();
+			if(internal::last_successful()) {
+				std::io::set_fg_color(std::io::color::GREEN);
+				std::println(" -> ok");
+			}
+			else {
+				std::io::set_fg_color(std::io::color::RED);
+				std::println(" -> FAILED!");
+				for(i : 0 -> std::size(global last_errors)) {
+					std::println(global last_errors[i]);
+				}
+			}
 			std::io::reset_color();
-			var test_case = cases[i];
-			switch(test_case.type) {
-				case case_type::RESULT:
-					on_result_case(instance, fx, test_case);
+			std::println("");
 
-				case case_type::BETWEEN:
-					on_between_case(instance, fx, test_case);
-				
-				case case_type::SUCCESS:
-					on_success_case(instance, fx, test_case);
+			global total_errors = global total_errors + global last_errors;
+			global last_errors = [];
+		}
 
-				case case_type::FAIL:
-					on_fail_case(instance, fx, test_case);
+
+
+		function last_successful() {
+			return std::empty(global last_errors);
+		}
+
+
+
+		function all_successful() {
+			return std::empty(global total_errors);
+		}
+
+
+
+		function inc_test() {
+			global test_count = global test_count + 1;
+		}
+
+
+		
+		function inc_case() {
+			global case_count = global case_count + 1;
+		}
+
+
+
+		function print_results() {
+			if(all_successful()) {
+				std::io::set_fg_color(std::io::color::GREEN);
+			}
+			else {
+				std::io::set_fg_color(std::io::color::RED);
+			}
+
+			std::println("Results");
+			std::println("Tests:       " + std::str(global test_count));
+			std::println("Total cases: " + std::str(global case_count));
+			std::println("Errors:      " + std::str(std::size(global total_errors)));
+
+			if(all_successful()) {
+				std::println("All tests successful :)");
+			}
+			else {
+				std::println(std::str(std::size(global total_errors)) + " test cases failed!");
 			}
 			std::io::reset_color();
 		}
-		std::println(instance.output, "");
 	}
 
 
 
-	function interprete_results(instance) {
-		std::println(instance.output,
-			"=== Result ===");
-		
-		std::println(instance.output,
-			std::str(instance.test_count) + " test(s)");
-		
-		std::println(instance.output,
-			std::str(instance.case_count) + " case(s) total");
-		
-		if(instance.error_count) {
-			std::println(instance.output, 
-				"Tests failed");
-			
-			std::println(instance.output,
-				std::str(instance.error_count) + " ERROR(S)");
+	function run_tests() {
+		var ns = reflect(namespace sphinx::test);
+		for(i : 0 -> std::size(ns.functions)) {
+			var fx = ns.functions[i];
+			std::print("Test: " + fx.name);
+			fx.fx_ptr();
+			internal::push_errors();
 		}
-		else {
-			std::println(instance.output,
-				"No errors found. All tests successful :)");
+		internal::print_results();
+	}
+
+
+
+	function assert_equal(a, b) {
+		internal::inc_case();
+		if(a != b) {
+			internal::emit_error("[FAILED] Expected equal value: " + std::str(a) + " != " + std::str(b));
 		}
-		std::println(instance.output, "");
+	}
+
+
+
+	function assert_true(input : bool) {
+		internal::inc_case();
+		if(!input) {
+			internal::emit_error("[FAILED] Expected true but got false");
+		}
+	}
+
+
+
+	function assert_false(input : bool) {
+		internal::inc_case();
+		if(input) {
+			internal::emit_error("[FAILED] Expected false but got true");
+		}
 	}
 }
