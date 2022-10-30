@@ -1,83 +1,81 @@
 namespace sphinx {
-	namespace internal {
-		global total_errors = [];
+	global total_errors = [];
+	global last_errors = [];
+	global test_count = 0;
+	global case_count = 0;
+
+
+	function emit_error(error) private {
+		std::insert_back(global last_errors, error);
+	}
+
+
+
+	function push_errors() private {
+		inc_test();
+		if(last_successful()) {
+			std::io::set_fg_color(std::io::color::GREEN);
+			std::println(" -> ok");
+		}
+		else {
+			std::io::set_fg_color(std::io::color::RED);
+			std::println(" -> FAILED!");
+			for(i : 0 -> std::size(global last_errors)) {
+				std::println(global last_errors[i]);
+			}
+		}
+		std::io::reset_color();
+
+		global total_errors = global total_errors + global last_errors;
 		global last_errors = [];
-		global test_count = 0;
-		global case_count = 0;
+	}
 
 
-		function emit_error(error) {
-			std::insert_back(global last_errors, error);
+
+	function last_successful() private {
+		return std::empty(global last_errors);
+	}
+
+
+
+	function all_successful() private {
+		return std::empty(global total_errors);
+	}
+
+
+
+	function inc_test() private {
+		global test_count = global test_count + 1;
+	}
+
+
+	
+	function inc_case() private {
+		global case_count = global case_count + 1;
+	}
+
+
+
+	function print_results() private {
+		if(all_successful()) {
+			std::io::set_fg_color(std::io::color::GREEN);
+		}
+		else {
+			std::io::set_fg_color(std::io::color::RED);
 		}
 
+		std::println("Results");
+		std::println("Tests:       " + std::str(global test_count));
+		std::println("Total cases: " + std::str(global case_count));
+		std::println("Errors:      " + std::str(std::size(global total_errors)));
 
-
-		function push_errors() {
-			internal::inc_test();
-			if(internal::last_successful()) {
-				std::io::set_fg_color(std::io::color::GREEN);
-				std::println(" -> ok");
-			}
-			else {
-				std::io::set_fg_color(std::io::color::RED);
-				std::println(" -> FAILED!");
-				for(i : 0 -> std::size(global last_errors)) {
-					std::println(global last_errors[i]);
-				}
-			}
-			std::io::reset_color();
-
-			global total_errors = global total_errors + global last_errors;
-			global last_errors = [];
+		if(all_successful()) {
+			std::println("All tests successful :)");
 		}
-
-
-
-		function last_successful() {
-			return std::empty(global last_errors);
+		else {
+			std::println(std::str(std::size(global total_errors)) + " test cases failed!");
 		}
-
-
-
-		function all_successful() {
-			return std::empty(global total_errors);
-		}
-
-
-
-		function inc_test() {
-			global test_count = global test_count + 1;
-		}
-
-
-		
-		function inc_case() {
-			global case_count = global case_count + 1;
-		}
-
-
-
-		function print_results() {
-			if(all_successful()) {
-				std::io::set_fg_color(std::io::color::GREEN);
-			}
-			else {
-				std::io::set_fg_color(std::io::color::RED);
-			}
-
-			std::println("Results");
-			std::println("Tests:       " + std::str(global test_count));
-			std::println("Total cases: " + std::str(global case_count));
-			std::println("Errors:      " + std::str(std::size(global total_errors)));
-
-			if(all_successful()) {
-				std::println("All tests successful :)");
-			}
-			else {
-				std::println(std::str(std::size(global total_errors)) + " test cases failed!");
-			}
-			std::io::reset_color();
-		}
+		std::io::reset_color();
 	}
 
 
@@ -88,35 +86,35 @@ namespace sphinx {
 			var fx = ns.functions[i];
 			std::print("Test: " + fx.name);
 			fx.fx_ptr();
-			internal::push_errors();
+			push_errors();
 		}
-		internal::print_results();
+		print_results();
 	}
 
 
 
-	function assert_equal(a, b) {
-		internal::inc_case();
+	function assert_equal(a, b) private {
+		inc_case();
 		if(a != b) {
-			internal::emit_error("[FAILED] Expected equal value: " + std::str(a) + " != " + std::str(b));
+			emit_error("[FAILED] Expected equal value: " + std::str(a) + " != " + std::str(b));
 		}
 	}
 
 
 
-	function assert_true(input : bool) {
-		internal::inc_case();
+	function assert_true(input : bool) private {
+		inc_case();
 		if(!input) {
-			internal::emit_error("[FAILED] Expected true but got false");
+			emit_error("[FAILED] Expected true but got false");
 		}
 	}
 
 
 
-	function assert_false(input : bool) {
-		internal::inc_case();
+	function assert_false(input : bool) private {
+		inc_case();
 		if(input) {
-			internal::emit_error("[FAILED] Expected false but got true");
+			emit_error("[FAILED] Expected false but got true");
 		}
 	}
 }
