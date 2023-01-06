@@ -96,10 +96,17 @@ namespace sphinx {
 	function assert_equal(a, b) private {
 		inc_case();
 		if(a != b) {
-			emit_error("[FAILED] Expected equal value: " + std::str(a) + " != " + std::str(b));
+			emit_error("[FAILED] Expected equal values: " + std::str(a) + " != " + std::str(b));
 		}
 	}
 
+
+	function assert_equal_strict(a, b) private {
+		inc_case();
+		if(a != b || std::typeid(a) != std::typeid(b)) {
+			emit_error("[FAILED] Expected equal values of equal type: " + std::str(a) + " != " + std::str(b));
+		}
+	}
 
 
 	function assert_true(input : bool) private {
