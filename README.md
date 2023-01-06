@@ -29,7 +29,7 @@ namespace sphinx::test {
 }
 ```
 
-Run test from main.
+Run tests from main.
 
 ```js
 function main(args) {
