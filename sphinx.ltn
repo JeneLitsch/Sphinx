@@ -1,8 +1,8 @@
 namespace sphinx {
-	global total_errors = [];
-	global last_errors = [];
-	global test_count = 0;
-	global case_count = 0;
+	var total_errors = [];
+	var last_errors = [];
+	var test_count = 0;
+	var case_count = 0;
 
 
 	function emit_error(error) private {
