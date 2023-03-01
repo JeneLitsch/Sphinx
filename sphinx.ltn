@@ -20,8 +20,8 @@ namespace sphinx {
 		else {
 			std::io::set_fg_color(std::io::color::RED);
 			std::println(" -> FAILED!");
-			for(i : 0 -> std::size(last_errors)) {
-				std::println(last_errors[i]);
+			for(err : last_errors) {
+				std::println(err);
 			}
 		}
 		std::io::reset_color();
@@ -82,8 +82,7 @@ namespace sphinx {
 
 	function run_tests() {
 		var ns = reflect(namespace sphinx::test);
-		for(i : 0 -> std::size(ns.functions)) {
-			var fx = ns.functions[i];
+		for(fx : ns.functions) {
 			std::print("Test: " + fx.name);
 			fx.fx_ptr();
 			push_errors();
