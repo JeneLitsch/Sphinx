@@ -6,7 +6,7 @@ namespace sphinx {
 
 
 	function emit_error(error) private {
-		std::insert_back(global last_errors, error);
+		std::insert_back(last_errors, error);
 	}
 
 
@@ -20,38 +20,38 @@ namespace sphinx {
 		else {
 			std::io::set_fg_color(std::io::color::RED);
 			std::println(" -> FAILED!");
-			for(i : 0 -> std::size(global last_errors)) {
-				std::println(global last_errors[i]);
+			for(i : 0 -> std::size(last_errors)) {
+				std::println(last_errors[i]);
 			}
 		}
 		std::io::reset_color();
 
-		global total_errors = global total_errors + global last_errors;
-		global last_errors = [];
+		total_errors = total_errors + last_errors;
+		last_errors = [];
 	}
 
 
 
 	function last_successful() private {
-		return std::empty(global last_errors);
+		return std::empty(last_errors);
 	}
 
 
 
 	function all_successful() private {
-		return std::empty(global total_errors);
+		return std::empty(total_errors);
 	}
 
 
 
 	function inc_test() private {
-		global test_count = global test_count + 1;
+		test_count = test_count + 1;
 	}
 
 
 	
 	function inc_case() private {
-		global case_count = global case_count + 1;
+		case_count = case_count + 1;
 	}
 
 
@@ -65,15 +65,15 @@ namespace sphinx {
 		}
 
 		std::println("Results");
-		std::println("Tests:       " + std::str(global test_count));
-		std::println("Total cases: " + std::str(global case_count));
-		std::println("Errors:      " + std::str(std::size(global total_errors)));
+		std::println("Tests:       " + std::str(test_count));
+		std::println("Total cases: " + std::str(case_count));
+		std::println("Errors:      " + std::str(std::size(total_errors)));
 
 		if(all_successful()) {
 			std::println("All tests successful :)");
 		}
 		else {
-			std::println(std::str(std::size(global total_errors)) + " test cases failed!");
+			std::println(std::str(std::size(total_errors)) + " test cases failed!");
 		}
 		std::io::reset_color();
 	}
