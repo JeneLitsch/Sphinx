@@ -108,7 +108,7 @@ namespace sphinx {
 	}
 
 
-	function assert_true(input : bool) private {
+	function assert_true(input) private {
 		inc_case();
 		if(!input) {
 			emit_error("[FAILED] Expected true but got false");
@@ -117,7 +117,7 @@ namespace sphinx {
 
 
 
-	function assert_false(input : bool) private {
+	function assert_false(input) private {
 		inc_case();
 		if(input) {
 			emit_error("[FAILED] Expected false but got true");
