@@ -134,10 +134,24 @@ namespace sphinx {
 	}
 
 
+
 	function assert_except(fx) private {
 		inc_case();
 		if(std::is_successful(fx)) {
 			emit_error("[FAILED] Expected exception but got success");
 		}
+	}
+
+
+
+	function fail() private {
+		inc_case();
+		emit_error("[FAILED] Call to fail()");
+	}
+
+
+
+	function pass() private {
+		inc_case();
 	}
 }
