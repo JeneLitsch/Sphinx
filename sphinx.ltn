@@ -3,6 +3,7 @@ namespace sphinx {
 	var last_errors = [];
 	var test_count = 0;
 	var case_count = 0;
+	var test_name;
 
 
 	function emit_error(error) private {
@@ -13,16 +14,21 @@ namespace sphinx {
 
 	function push_errors() private {
 		inc_test();
+		std::print("Test: ");
+		
 		if(last_successful()) {
 			std::io::set_fg_color(std::io::color::GREEN);
-			std::println(" -> ok");
 		}
 		else {
 			std::io::set_fg_color(std::io::color::RED);
-			std::println(" -> FAILED!");
-			for(err : last_errors) {
-				std::println(err);
-			}
+		}
+
+		std::print(test_name);
+
+		std::println("");
+		for(err : last_errors) {
+			std::print("\t");
+			std::println(err);
 		}
 		std::io::reset_color();
 
@@ -83,7 +89,7 @@ namespace sphinx {
 	function run_tests() {
 		var ns = reflect(namespace sphinx::test);
 		for(fx : ns.functions) {
-			std::print("Test: " + fx.name);
+			test_name = fx.name;
 			fx.fx_ptr();
 			push_errors();
 		}
@@ -140,6 +146,12 @@ namespace sphinx {
 		if(std::is_successful(fx)) {
 			emit_error("[FAILED] Expected exception but got success");
 		}
+	}
+
+
+
+	function test_name(name) private {
+		test_name = name;
 	}
 
 
