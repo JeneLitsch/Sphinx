@@ -144,6 +144,15 @@ namespace sphinx {
 
 
 
+	function assert_type(type, expr) private {
+		inc_case();
+		if(!std::is(type, expr)) {
+			emit_error("[FAILED] Mismatching types: Expected " + std::str(type) + " but got value " + std::str(expr));
+		}
+	}
+
+
+
 	function fail() private {
 		inc_case();
 		emit_error("[FAILED] Call to fail()");
