@@ -12,32 +12,6 @@ namespace sphinx {
 
 
 
-	function push_errors() private {
-		inc_test();
-		std::print("Test: ");
-		
-		if(last_successful()) {
-			std::io::set_fg_color(std::io::color::GREEN);
-		}
-		else {
-			std::io::set_fg_color(std::io::color::RED);
-		}
-
-		std::print(test_name);
-
-		std::println("");
-		for(err : last_errors) {
-			std::print("\t");
-			std::println(err);
-		}
-		std::io::reset_color();
-
-		total_errors = total_errors + last_errors;
-		last_errors = [];
-	}
-
-
-
 	function last_successful() private {
 		return std::empty(last_errors);
 	}
@@ -86,12 +60,38 @@ namespace sphinx {
 
 
 
+
 	function run_tests() {
 		var ns = reflect(namespace sphinx::test);
+		var counter = 0;
 		for(fx : ns.functions) {
+			counter = counter + 1;
+			var	prev_case_count = case_count;
 			test_name = fx.name;
 			fx.fx_ptr();
-			push_errors();
+			inc_test();
+
+			var progress_counter = std::right_pad(std::str(counter) + "/" + std::str(ns.functions->size()), 9);
+			var case_difference = " " + std::left_pad("+" + std::str(case_count - prev_case_count), 4)  + " cases";
+			
+
+			std::print("Test ");
+			std::print(progress_counter);
+			std::print(case_difference);
+			std::print(": ");
+
+			std::io::set_fg_color(last_successful() ? std::io::color::GREEN : std::io::color::RED);
+
+			std::print(test_name);
+
+			std::println("");
+			for(err : last_errors) {
+				std::print("\t");
+				std::println(err);
+			}
+			std::io::reset_color();
+			total_errors = total_errors + last_errors;
+			last_errors = [];
 		}
 		print_results();
 	}
