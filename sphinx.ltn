@@ -86,7 +86,7 @@ namespace sphinx {
 
 			std::println("");
 			for(err : last_errors) {
-				std::print("\t");
+				std::print(">> ");
 				std::println(err);
 			}
 			std::io::reset_color();
